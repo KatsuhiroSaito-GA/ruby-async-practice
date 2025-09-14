@@ -35,22 +35,17 @@ bundle install
 docker compose up
 ```
 
+### Sidekiqを使ってジョブを実行する場合
 #### Sidekiqサーバーを立ち上げる
 
 ```bash
 bundle exec sidekiq -r ./sidekiq/configuration.rb
 ```
 
-## 5. ジョブをキューに追加する
+#### ジョブをキューに追加する
 
 ```bash
 bundle exec ruby sidekiq/enqueue_job.rb
-```
-
-## 停止方法
-
-```bash
-docker compose down
 ```
 
 ## tips
