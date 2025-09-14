@@ -1,3 +1,4 @@
 source 'https://rubygems.org'
 
 gem 'sidekiq', '~> 7.0'
+gem 'resque'
