@@ -1,0 +1,25 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    base64 (0.3.0)
+    connection_pool (2.5.4)
+    logger (1.7.0)
+    rack (3.2.1)
+    redis-client (0.25.3)
+      connection_pool
+    sidekiq (7.3.9)
+      base64
+      connection_pool (>= 2.3.0)
+      logger
+      rack (>= 2.2.4)
+      redis-client (>= 0.22.2)
+
+PLATFORMS
+  arm64-darwin-22
+  ruby
+
+DEPENDENCIES
+  sidekiq (~> 7.0)
+
+BUNDLED WITH
+   2.5.22
