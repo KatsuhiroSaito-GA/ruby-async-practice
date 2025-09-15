@@ -1,3 +1,6 @@
 require_relative 'configuration'
 
-Sidekiq::SampleJob.perform_async({ 'name' => 'bar' })
+params = { 'name' => 'bar' }
+Sidekiq::SampleJob.perform_async(params)
+
+puts "Sidekiq job enqueued with params: #{params}"

@@ -1,4 +1,5 @@
 require 'sidekiq'
+require_relative 'sample_job'
 
 redis_config = { url: 'redis://localhost:6379/0' }
 
@@ -9,5 +10,3 @@ end
 Sidekiq.configure_client do |config|
   config.redis = redis_config
 end
-
-require_relative 'sample_job'

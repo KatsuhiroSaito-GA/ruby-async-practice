@@ -1,6 +1,6 @@
 module Sidekiq
   class SampleJob
-    include Sidekiq::Job
+    include Sidekiq::Worker
 
     def perform(params)
       pp params
