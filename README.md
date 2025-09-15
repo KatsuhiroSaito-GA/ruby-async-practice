@@ -108,7 +108,6 @@ bundle exec ruby activejob/enqueue_job.rb
 ```
 
 #### Resqueアダプターに変更する場合
-
 `activejob/configuration.rb`の以下の箇所を変更：
 
 ```ruby
@@ -119,14 +118,14 @@ require_relative '../resque/configuration'  # sidekiq -> resque
 ActiveJob::Base.queue_adapter = :resque     # :sidekiq -> :resque
 ```
 
-##### Resqueワーカーを立ち上げる
+※ sidekiqとresqueではJobの実装(sidekiq/sample_job.rb vs resque/sample_job.rb)・実行(sidekiq/enqueue_job.rb vs resque/enqueue_job.rb)の仕方が異なるのに、ActiveJobを使う場合はJobの実装・実行方法は変えずにsidekiqとresqueを切り替えられる点に注目！
 
+##### Resqueワーカーを立ち上げる
 ```bash
 bundle exec ruby -r ./activejob/configuration.rb -e "Resque::Worker.new('*').work"
 ```
 
 ##### ジョブをキューに追加する
-
 別のターミナルで以下を実行：
 
 ```bash
@@ -134,7 +133,6 @@ bundle exec ruby activejob/enqueue_job.rb
 ```
 
 ##### 動作確認
-
 ワーカー側で以下のような出力が表示されることを確認：
 
 ```
