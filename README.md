@@ -100,11 +100,11 @@ bundle exec ruby activejob/enqueue_job.rb
 ワーカー側で以下のような出力が表示されることを確認：
 
 ```
-2025-09-15T04:13:34.843Z pid=25632 tid=m2o class=SampleJob jid=a07539af588713dbec273247 INFO: start
-[ActiveJob] [SampleJob] [788acfaf-f063-4479-827c-0f1edf6937ce] Performing SampleJob (Job ID: 788acfaf-f063-4479-827c-0f1edf6937ce) from Sidekiq(default) enqueued at 2025-09-15T04:13:34.834514000Z with arguments: {"company"=>"ga technologies"}
-{"company"=>"ga technologies"}
-[ActiveJob] [SampleJob] [788acfaf-f063-4479-827c-0f1edf6937ce] Performed SampleJob (Job ID: 788acfaf-f063-4479-827c-0f1edf6937ce) from Sidekiq(default) in 9.23ms
-2025-09-15T04:13:34.854Z pid=25632 tid=m2o class=SampleJob jid=a07539af588713dbec273247 elapsed=0.011 INFO: done
+2025-09-15T05:39:30.618Z pid=28318 tid=k1q class=ActiveJobPractice::SampleJob jid=7eab37a6629fdf7693f90e67 INFO: start
+[ActiveJob] [ActiveJobPractice::SampleJob] [4a959905-7c0c-4705-ba74-89c4a751af09] Performing ActiveJobPractice::SampleJob (Job ID: 4a959905-7c0c-4705-ba74-89c4a751af09) from Sidekiq(default) enqueued at 2025-09-15T05:39:30.610898000Z with arguments: {"message"=>"Hello ActiveJob!"}
+{"message"=>"Hello ActiveJob!"}
+[ActiveJob] [ActiveJobPractice::SampleJob] [4a959905-7c0c-4705-ba74-89c4a751af09] Performed ActiveJobPractice::SampleJob (Job ID: 4a959905-7c0c-4705-ba74-89c4a751af09) from Sidekiq(default) in 12.21ms
+2025-09-15T05:39:30.632Z pid=28318 tid=k1q class=ActiveJobPractice::SampleJob jid=7eab37a6629fdf7693f90e67 elapsed=0.013 INFO: done
 ```
 
 #### Resqueアダプターに変更する場合

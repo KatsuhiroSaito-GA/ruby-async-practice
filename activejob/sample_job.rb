@@ -1,7 +1,9 @@
-class SampleJob < ActiveJob::Base
-  queue_as :default
+module ActiveJobPractice
+  class SampleJob < ActiveJob::Base
+    queue_as :default
 
-  def perform(params)
-    pp params
+    def perform(params)
+      pp params
+    end
   end
 end
