@@ -13,10 +13,14 @@ ruby-async-practice/
 │   ├── configuration.rb      # Sidekiq設定
 │   ├── enqueue_job.rb        # ジョブをキューに追加するスクリプト
 │   └── sample_job.rb         # Sidekiqジョブクラス定義
-└── resque/
-    ├── configuration.rb      # Resque設定
+├── resque/
+│   ├── configuration.rb      # Resque設定
+│   ├── enqueue_job.rb        # ジョブをキューに追加するスクリプト
+│   └── sample_job.rb         # Resqueジョブクラス定義
+└── activejob/
+    ├── configuration.rb      # ActiveJob設定（Sidekiqアダプター使用）
     ├── enqueue_job.rb        # ジョブをキューに追加するスクリプト
-    └── sample_job.rb         # Resqueジョブクラス定義
+    └── sample_job.rb         # ActiveJobジョブクラス定義
 ```
 
 ## 1. 環境構築
@@ -81,6 +85,36 @@ bundle exec ruby resque/enqueue_job.rb
 
 ```
 {"message"=>"Hello Resque!"}
+```
+
+### ActiveJobを使ってジョブを実行する場合
+
+ActiveJobはSidekiqをアダプターとして使用します。
+
+#### Sidekiqワーカーを立ち上げる
+
+```bash
+bundle exec sidekiq -r ./activejob/configuration.rb
+```
+
+#### ジョブをキューに追加する
+
+別のターミナルで以下を実行：
+
+```bash
+bundle exec ruby activejob/enqueue_job.rb
+```
+
+#### 動作確認
+
+ワーカー側で以下のような出力が表示されることを確認：
+
+```
+2025-09-15T04:13:34.843Z pid=25632 tid=m2o class=SampleJob jid=a07539af588713dbec273247 INFO: start
+[ActiveJob] [SampleJob] [788acfaf-f063-4479-827c-0f1edf6937ce] Performing SampleJob (Job ID: 788acfaf-f063-4479-827c-0f1edf6937ce) from Sidekiq(default) enqueued at 2025-09-15T04:13:34.834514000Z with arguments: {"company"=>"ga technologies"}
+{"company"=>"ga technologies"}
+[ActiveJob] [SampleJob] [788acfaf-f063-4479-827c-0f1edf6937ce] Performed SampleJob (Job ID: 788acfaf-f063-4479-827c-0f1edf6937ce) from Sidekiq(default) in 9.23ms
+2025-09-15T04:13:34.854Z pid=25632 tid=m2o class=SampleJob jid=a07539af588713dbec273247 elapsed=0.011 INFO: done
 ```
 
 ## tips
