@@ -6,7 +6,7 @@ Rubyでバックグラウンドジョブ処理をSidekiq、Resque、ActiveJobを
 
 ```
 ruby-async-practice/
-├── Gemfile                    # Gem依存関係
+├── Gemfile                   # Gem依存関係
 ├── Gemfile.lock              # Gemロックファイル
 ├── compose.yml               # Docker Compose設定（Redis用）
 ├── sidekiq/
@@ -24,7 +24,6 @@ ruby-async-practice/
 ```
 
 ## 1. 環境構築
-
 ### 必要な環境
 - Ruby 3.x
 - Docker & Docker Compose
@@ -38,20 +37,17 @@ bundle install
 ```
 
 #### Redisサーバーを立ち上げる
-
 ```bash
 docker compose up
 ```
 
 ### Sidekiqを使ってジョブを実行する場合
 #### Sidekiqサーバーを立ち上げる
-
 ```bash
 bundle exec sidekiq -r ./sidekiq/configuration.rb
 ```
 
 #### ジョブをキューに追加する
-
 ```bash
 bundle exec ruby sidekiq/enqueue_job.rb
 ```
@@ -60,20 +56,18 @@ bundle exec ruby sidekiq/enqueue_job.rb
 Sidekiqサーバー側で以下のような出力が表示されることを確認：
 
 ```
-2025-09-15T03:15:03.112Z pid=18761 tid=cot class=Sidekiq::SampleJob jid=b3431057bb72e0fbe7ec137d INFO: start
-{"name"=>"bar"}
-2025-09-15T03:15:03.116Z pid=18761 tid=cot class=Sidekiq::SampleJob jid=b3431057bb72e0fbe7ec137d elapsed=0.004 INFO: done
+2025-09-15T05:34:43.411Z pid=28080 tid=k5w class=SidekiqPractice::SampleJob jid=6e5fac0666f80c2afbbd2566 INFO: start
+{"message"=>"Hello Sidekiq!"}
+2025-09-15T05:34:43.415Z pid=28080 tid=k5w class=SidekiqPractice::SampleJob jid=6e5fac0666f80c2afbbd2566 elapsed=0.004 INFO: done
 ```
 
 ### Resqueを使ってジョブを実行する場合
 #### Resqueワーカーを立ち上げる
-
 ```bash
 bundle exec ruby resque/configuration.rb
 ```
 
 #### ジョブをキューに追加する
-
 別のターミナルで以下を実行：
 
 ```bash
@@ -88,17 +82,14 @@ bundle exec ruby resque/enqueue_job.rb
 ```
 
 ### ActiveJobを使ってジョブを実行する場合
-
-ActiveJobはSidekiqをアダプターとして使用します。
+現在はActiveJobのアダプターとしてSidekiqを使うように指定しています。
 
 #### Sidekiqワーカーを立ち上げる
-
 ```bash
 bundle exec sidekiq -r ./activejob/configuration.rb
 ```
 
 #### ジョブをキューに追加する
-
 別のターミナルで以下を実行：
 
 ```bash
@@ -106,7 +97,6 @@ bundle exec ruby activejob/enqueue_job.rb
 ```
 
 #### 動作確認
-
 ワーカー側で以下のような出力が表示されることを確認：
 
 ```
@@ -115,6 +105,42 @@ bundle exec ruby activejob/enqueue_job.rb
 {"company"=>"ga technologies"}
 [ActiveJob] [SampleJob] [788acfaf-f063-4479-827c-0f1edf6937ce] Performed SampleJob (Job ID: 788acfaf-f063-4479-827c-0f1edf6937ce) from Sidekiq(default) in 9.23ms
 2025-09-15T04:13:34.854Z pid=25632 tid=m2o class=SampleJob jid=a07539af588713dbec273247 elapsed=0.011 INFO: done
+```
+
+#### Resqueアダプターに変更する場合
+
+`activejob/configuration.rb`の以下の箇所を変更：
+
+```ruby
+# 2行目を変更
+require_relative '../resque/configuration'  # sidekiq -> resque
+
+# 6行目を変更
+ActiveJob::Base.queue_adapter = :resque     # :sidekiq -> :resque
+```
+
+##### Resqueワーカーを立ち上げる
+
+```bash
+bundle exec ruby resque/configuration.rb
+```
+
+##### ジョブをキューに追加する
+
+別のターミナルで以下を実行：
+
+```bash
+bundle exec ruby activejob/enqueue_job.rb
+```
+
+##### 動作確認
+
+ワーカー側で以下のような出力が表示されることを確認：
+
+```
+[ActiveJob] [SampleJob] [job-id] Performing SampleJob from Resque(default) with arguments: {"company"=>"ga technologies"}
+{"company"=>"ga technologies"}
+[ActiveJob] [SampleJob] [job-id] Performed SampleJob from Resque(default) in XXms
 ```
 
 ## tips

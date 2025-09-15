@@ -1,4 +1,4 @@
-module Resque
+module ResquePractice
   class SampleJob
     @queue = :default
 
