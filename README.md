@@ -2,6 +2,11 @@
 
 Rubyでバックグラウンドジョブ処理をSidekiq、Resque、ActiveJobを使って実行してみるためのプロジェクトです。
 
+## ゴール
+1. Sidekiq、Resqueのそれぞれでジョブを実装する方法、ジョブを実行する方法の違いに着目してみよう。
+1. ActiveJobを使う場合、SidekiqとResqueのどちらのアダプターを使う場合でも、ジョブの実装・実行方法は変えずに切り替えられることを体験してみよう。
+1. Redis CLIを使って、実際にRedisに保存されているデータを確認し、Redisがデータベースであることを体験してみよう。
+
 ## プロジェクト構成
 
 ```
@@ -144,7 +149,7 @@ require_relative '../resque/configuration'  # sidekiq -> resque
 ActiveJob::Base.queue_adapter = :resque     # :sidekiq -> :resque
 ```
 
-※ sidekiqとresqueではJobの実装(sidekiq/sample_job.rb vs resque/sample_job.rb)・実行(sidekiq/enqueue_job.rb vs resque/enqueue_job.rb)の仕方が異なるのに、ActiveJobを使う場合はJobの実装・実行方法は変えずにsidekiqとresqueを切り替えられる点に注目！
+※ sidekiqとresqueではジョブの実装(sidekiq/sample_job.rb vs resque/sample_job.rb)・実行(sidekiq/enqueue_job.rb vs resque/enqueue_job.rb)の仕方が異なるのに、ActiveJobを使う場合はジョブの実装・実行方法は変えずにsidekiqとresqueを切り替えられる点に注目！
 
 ##### Resqueワーカーを立ち上げる
 ```bash
@@ -197,3 +202,25 @@ smembers queues
 # Resqueの場合
 smembers resque:queues
 ```
+
+Redisに保存された実行待ちのジョブを確認する。
+
+```bash
+# Sidekiqサーバーを立ち上げる。
+docker compose exec ruby bash
+bundle exec sidekiq -r ./sidekiq/configuration.rb
+
+# 別のターミナルで1分後に実行されるジョブをqueueに追加する。
+docker compose exec ruby bash
+bundle exec ruby -r ./sidekiq/configuration.rb -e "SidekiqPractice::SampleJob.perform_in(60, { 'message' => 'Hello in 1 minute' })"
+```
+
+```bash
+# 1分以内にRedis CLIで実行待ちのジョブ(schedule)を確認する。
+docker compose exec redis redis-cli -n 0
+127.0.0.1:6379> ZRANGE schedule 0 -1 WITHSCORES
+1) "{\"retry\":true,\"queue\":\"default\",\"class\":\"SidekiqPractice::SampleJob\",\"args\":[{\"message\":\"Hello in 1 minute\"}],\"jid\":\"4b90bf0f2b689b7bbce0f34e\",\"created_at\":1757919027.3135984}"
+2) "1.7579190873135731e+9"
+```
+
+1分経過後にもう一度、`ZRANGE schedule 0 -1 WITHSCORES`を実行し、ジョブが消えていることを確認してみよう。
