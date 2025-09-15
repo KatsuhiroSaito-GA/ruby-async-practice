@@ -64,7 +64,7 @@ Sidekiqサーバー側で以下のような出力が表示されることを確�
 ### Resqueを使ってジョブを実行する場合
 #### Resqueワーカーを立ち上げる
 ```bash
-bundle exec ruby resque/configuration.rb
+bundle exec ruby -r ./resque/configuration.rb -e "Resque::Worker.new('*').work"
 ```
 
 #### ジョブをキューに追加する
@@ -122,7 +122,7 @@ ActiveJob::Base.queue_adapter = :resque     # :sidekiq -> :resque
 ##### Resqueワーカーを立ち上げる
 
 ```bash
-bundle exec ruby resque/configuration.rb
+bundle exec ruby -r ./activejob/configuration.rb -e "Resque::Worker.new('*').work"
 ```
 
 ##### ジョブをキューに追加する
