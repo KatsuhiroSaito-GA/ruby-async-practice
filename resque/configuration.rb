@@ -1,4 +1,4 @@
 require 'resque'
 require_relative 'sample_job'
 
-Resque.redis = 'redis://localhost:6379/1'
+Resque.redis = 'redis://redis:6379/1'

@@ -7,6 +7,15 @@ services:
       - 6379:6379
     command: redis-server --appendonly yes
 
+  ruby:
+    build: .
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+    stdin_open: true
+    tty: true
+
 volumes:
   redis-data:
     driver: local

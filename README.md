@@ -6,9 +6,10 @@ Rubyでバックグラウンドジョブ処理をSidekiq、Resque、ActiveJobを
 
 ```
 ruby-async-practice/
+├── Dockerfile                # Ruby環境用Dockerイメージ設定
 ├── Gemfile                   # Gem依存関係
 ├── Gemfile.lock              # Gemロックファイル
-├── compose.yml               # Docker Compose設定（Redis用）
+├── compose.yml               # Docker Compose設定（Redis + Ruby環境）
 ├── sidekiq/
 │   ├── configuration.rb      # Sidekiq設定
 │   ├── enqueue_job.rb        # ジョブをキューに追加するスクリプト
@@ -23,32 +24,41 @@ ruby-async-practice/
     └── sample_job.rb         # ActiveJobジョブクラス定義
 ```
 
-## 1. 環境構築
+## 環境構築
 ### 必要な環境
-- Ruby 3.x
 - Docker & Docker Compose
-- Bundler
 
 ### セットアップ
-#### Gemをインストール
-```bash
-# Gemをインストール
-bundle install
-```
+#### Docker環境を立ち上げる
 
-#### Redisサーバーを立ち上げる
 ```bash
 docker compose up
 ```
 
+別ターミナルでRubyコンテナにアクセス：
+
+```bash
+docker compose exec ruby bash
+```
+
 ### Sidekiqを使ってジョブを実行する場合
+
+**以下の操作はすべてRubyコンテナ内で実行します：**
+
 #### Sidekiqサーバーを立ち上げる
 ```bash
 bundle exec sidekiq -r ./sidekiq/configuration.rb
 ```
 
 #### ジョブをキューに追加する
+
+別のターミナルでRubyコンテナにアクセスして実行：
+
 ```bash
+# 別ターミナル
+docker compose exec ruby bash
+
+# コンテナ内で実行
 bundle exec ruby sidekiq/enqueue_job.rb
 ```
 
@@ -62,15 +72,23 @@ Sidekiqサーバー側で以下のような出力が表示されることを確�
 ```
 
 ### Resqueを使ってジョブを実行する場合
+
+**以下の操作はすべてRubyコンテナ内で実行します：**
+
 #### Resqueワーカーを立ち上げる
 ```bash
 bundle exec ruby -r ./resque/configuration.rb -e "Resque::Worker.new('*').work"
 ```
 
 #### ジョブをキューに追加する
-別のターミナルで以下を実行：
+
+別のターミナルでRubyコンテナにアクセスして実行：
 
 ```bash
+# 別ターミナル
+docker compose exec ruby bash
+
+# コンテナ内で実行
 bundle exec ruby resque/enqueue_job.rb
 ```
 
@@ -82,6 +100,9 @@ bundle exec ruby resque/enqueue_job.rb
 ```
 
 ### ActiveJobを使ってジョブを実行する場合
+
+**以下の操作はすべてRubyコンテナ内で実行します：**
+
 現在はActiveJobのアダプターとしてSidekiqを使うように指定しています。
 
 #### Sidekiqワーカーを立ち上げる
@@ -90,9 +111,14 @@ bundle exec sidekiq -r ./activejob/configuration.rb
 ```
 
 #### ジョブをキューに追加する
-別のターミナルで以下を実行：
+
+別のターミナルでRubyコンテナにアクセスして実行：
 
 ```bash
+# 別ターミナル
+docker compose exec ruby bash
+
+# コンテナ内で実行
 bundle exec ruby activejob/enqueue_job.rb
 ```
 
@@ -126,9 +152,14 @@ bundle exec ruby -r ./activejob/configuration.rb -e "Resque::Worker.new('*').wor
 ```
 
 ##### ジョブをキューに追加する
-別のターミナルで以下を実行：
+
+別のターミナルでRubyコンテナにアクセスして実行：
 
 ```bash
+# 別ターミナル
+docker compose exec ruby bash
+
+# コンテナ内で実行
 bundle exec ruby activejob/enqueue_job.rb
 ```
 
