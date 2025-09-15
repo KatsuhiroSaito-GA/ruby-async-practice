@@ -77,16 +77,16 @@ docker compose exec ruby bundle exec ruby resque/enqueue_job.rb
 ```
 
 #### 動作確認
-ワーカー側で以下のような出力が表示されることを確認：
+Resqueワーカー側で以下のような出力が表示されることを確認：
 
 ```
 {"message"=>"Hello Resque!"}
 ```
 
 ### ActiveJobを使ってジョブを実行する場合
-現在はActiveJobのアダプターとしてSidekiqを使うように指定しています。
+現在はActiveJobのアダプター(`ActiveJob::Base.queue_adapter`)としてSidekiqを使うように指定しています。
 
-#### Sidekiqワーカーを立ち上げる
+#### Sidekiqサーバーを立ち上げる
 ```bash
 docker compose exec ruby bundle exec sidekiq -r ./activejob/configuration.rb
 ```
@@ -99,7 +99,7 @@ docker compose exec ruby bundle exec ruby activejob/enqueue_job.rb
 ```
 
 #### 動作確認
-ワーカー側で以下のような出力が表示されることを確認：
+Sidekiqサーバー側で以下のような出力が表示されることを確認：
 
 ```
 2025-09-15T05:39:30.618Z pid=28318 tid=k1q class=ActiveJobPractice::SampleJob jid=7eab37a6629fdf7693f90e67 INFO: start
@@ -120,8 +120,6 @@ require_relative '../resque/configuration'  # sidekiq -> resque
 ActiveJob::Base.queue_adapter = :resque     # :sidekiq -> :resque
 ```
 
-※ sidekiqとresqueではジョブの実装(`sidekiq/sample_job.rb` vs `resque/sample_job.rb`)・実行(`sidekiq/enqueue_job.rb` vs `resque/enqueue_job.rb`)の仕方が異なるのに、ActiveJobを使う場合はジョブの実装・実行方法は変えずにsidekiqとresqueを切り替えられる点に注目！
-
 ##### Resqueワーカーを立ち上げる
 ```bash
 docker compose exec ruby bundle exec ruby -r ./activejob/configuration.rb -e "Resque::Worker.new('*').work"
@@ -135,13 +133,15 @@ docker compose exec ruby bundle exec ruby activejob/enqueue_job.rb
 ```
 
 ##### 動作確認
-ワーカー側で以下のような出力が表示されることを確認：
+Resqueワーカー側で以下のような出力が表示されることを確認：
 
 ```
 [ActiveJob] [SampleJob] [job-id] Performing SampleJob from Resque(default) with arguments: {"company"=>"ga technologies"}
 {"company"=>"ga technologies"}
 [ActiveJob] [SampleJob] [job-id] Performed SampleJob from Resque(default) in XXms
 ```
+
+※ sidekiqとresqueではジョブの実装(`sidekiq/sample_job.rb` vs `resque/sample_job.rb`)・実行(`sidekiq/enqueue_job.rb` vs `resque/enqueue_job.rb`)の仕方が異なるのに、ActiveJobを使う場合はジョブの実装・実行方法は変えずにsidekiqとresqueを切り替えられる点に注目！
 
 ## tips
 ### Redis CLIを実行する
