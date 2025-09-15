@@ -40,31 +40,17 @@ ruby-async-practice/
 docker compose up
 ```
 
-別ターミナルでRubyコンテナにアクセス：
-
-```bash
-docker compose exec ruby bash
-```
-
 ### Sidekiqを使ってジョブを実行する場合
-
-**以下の操作はすべてRubyコンテナ内で実行します：**
-
 #### Sidekiqサーバーを立ち上げる
 ```bash
-bundle exec sidekiq -r ./sidekiq/configuration.rb
+docker compose exec ruby bundle exec sidekiq -r ./sidekiq/configuration.rb
 ```
 
 #### ジョブをキューに追加する
-
-別のターミナルでRubyコンテナにアクセスして実行：
+別のターミナルで以下を実行：
 
 ```bash
-# 別ターミナル
-docker compose exec ruby bash
-
-# コンテナ内で実行
-bundle exec ruby sidekiq/enqueue_job.rb
+docker compose exec ruby bundle exec ruby sidekiq/enqueue_job.rb
 ```
 
 #### 動作確認
@@ -78,23 +64,16 @@ Sidekiqサーバー側で以下のような出力が表示されることを確�
 
 ### Resqueを使ってジョブを実行する場合
 
-**以下の操作はすべてRubyコンテナ内で実行します：**
-
 #### Resqueワーカーを立ち上げる
 ```bash
-bundle exec ruby -r ./resque/configuration.rb -e "Resque::Worker.new('*').work"
+docker compose exec ruby bundle exec ruby -r ./resque/configuration.rb -e "Resque::Worker.new('*').work"
 ```
 
 #### ジョブをキューに追加する
-
-別のターミナルでRubyコンテナにアクセスして実行：
+別のターミナルで以下を実行：
 
 ```bash
-# 別ターミナル
-docker compose exec ruby bash
-
-# コンテナ内で実行
-bundle exec ruby resque/enqueue_job.rb
+docker compose exec ruby bundle exec ruby resque/enqueue_job.rb
 ```
 
 #### 動作確認
@@ -105,26 +84,18 @@ bundle exec ruby resque/enqueue_job.rb
 ```
 
 ### ActiveJobを使ってジョブを実行する場合
-
-**以下の操作はすべてRubyコンテナ内で実行します：**
-
 現在はActiveJobのアダプターとしてSidekiqを使うように指定しています。
 
 #### Sidekiqワーカーを立ち上げる
 ```bash
-bundle exec sidekiq -r ./activejob/configuration.rb
+docker compose exec ruby bundle exec sidekiq -r ./activejob/configuration.rb
 ```
 
 #### ジョブをキューに追加する
-
-別のターミナルでRubyコンテナにアクセスして実行：
+別のターミナルで以下を実行：
 
 ```bash
-# 別ターミナル
-docker compose exec ruby bash
-
-# コンテナ内で実行
-bundle exec ruby activejob/enqueue_job.rb
+docker compose exec ruby bundle exec ruby activejob/enqueue_job.rb
 ```
 
 #### 動作確認
@@ -138,7 +109,7 @@ bundle exec ruby activejob/enqueue_job.rb
 2025-09-15T05:39:30.632Z pid=28318 tid=k1q class=ActiveJobPractice::SampleJob jid=7eab37a6629fdf7693f90e67 elapsed=0.013 INFO: done
 ```
 
-#### Resqueアダプターに変更する場合
+#### ActiveJobで使うアダプターをResqueに変更する場合
 `activejob/configuration.rb`の以下の箇所を変更：
 
 ```ruby
@@ -149,23 +120,18 @@ require_relative '../resque/configuration'  # sidekiq -> resque
 ActiveJob::Base.queue_adapter = :resque     # :sidekiq -> :resque
 ```
 
-※ sidekiqとresqueではジョブの実装(sidekiq/sample_job.rb vs resque/sample_job.rb)・実行(sidekiq/enqueue_job.rb vs resque/enqueue_job.rb)の仕方が異なるのに、ActiveJobを使う場合はジョブの実装・実行方法は変えずにsidekiqとresqueを切り替えられる点に注目！
+※ sidekiqとresqueではジョブの実装(`sidekiq/sample_job.rb` vs `resque/sample_job.rb`)・実行(`sidekiq/enqueue_job.rb` vs `resque/enqueue_job.rb`)の仕方が異なるのに、ActiveJobを使う場合はジョブの実装・実行方法は変えずにsidekiqとresqueを切り替えられる点に注目！
 
 ##### Resqueワーカーを立ち上げる
 ```bash
-bundle exec ruby -r ./activejob/configuration.rb -e "Resque::Worker.new('*').work"
+docker compose exec ruby bundle exec ruby -r ./activejob/configuration.rb -e "Resque::Worker.new('*').work"
 ```
 
 ##### ジョブをキューに追加する
-
-別のターミナルでRubyコンテナにアクセスして実行：
+別のターミナルで以下を実行：
 
 ```bash
-# 別ターミナル
-docker compose exec ruby bash
-
-# コンテナ内で実行
-bundle exec ruby activejob/enqueue_job.rb
+docker compose exec ruby bundle exec ruby activejob/enqueue_job.rb
 ```
 
 ##### 動作確認
@@ -207,12 +173,10 @@ Redisに保存された実行待ちのジョブを確認する。
 
 ```bash
 # Sidekiqサーバーを立ち上げる。
-docker compose exec ruby bash
-bundle exec sidekiq -r ./sidekiq/configuration.rb
+docker compose exec ruby bundle exec sidekiq -r ./sidekiq/configuration.rb
 
 # 別のターミナルで1分後に実行されるジョブをqueueに追加する。
-docker compose exec ruby bash
-bundle exec ruby -r ./sidekiq/configuration.rb -e "SidekiqPractice::SampleJob.perform_in(60, { 'message' => 'Hello in 1 minute' })"
+docker compose exec ruby bundle exec ruby -r ./sidekiq/configuration.rb -e "SidekiqPractice::SampleJob.perform_in(60, { 'message' => 'Hello in 1 minute' })"
 ```
 
 ```bash
@@ -224,3 +188,8 @@ docker compose exec redis redis-cli -n 0
 ```
 
 1分経過後にもう一度、`ZRANGE schedule 0 -1 WITHSCORES`を実行し、ジョブが消えていることを確認してみよう。
+
+```bash
+127.0.0.1:6379> ZRANGE schedule 0 -1 WITHSCORES
+(empty array)
+```
